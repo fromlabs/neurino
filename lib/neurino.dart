@@ -4,5 +4,5 @@
 library neurino;
 
 export 'src/node.dart';
-export 'src/model_graph.dart';
-export 'src/model_session.dart';
+export 'src/model_descriptor.dart';
+export 'src/session.dart';

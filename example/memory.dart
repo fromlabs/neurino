@@ -13,17 +13,17 @@ import 'package:neurino/neurino.dart';
 main() {
   // model graph
 
-  var model = new ModelGraph();
+  var model = new ModelDescriptor();
 
-  var x = model.register(new PlaceHolderNode());
+  var x = model.register(new PlaceHolder());
 
-  var y0 = model.register(new ConstantNode(0));
+  var y0 = model.register(new Constant(0));
 
   var y = x;
-  var y1 = model.register(new MemoryNode(y, y0));
-  var y2 = model.register(new MemoryNode(y1, y0));
+  var y1 = model.register(new Memory(y, y0));
+  var y2 = model.register(new Memory(y1, y0));
 
-  var ys = model.register(new BatchNode([y, y1, y2]));
+  var ys = model.register(new Batch([y, y1, y2]));
 
   // model session
 

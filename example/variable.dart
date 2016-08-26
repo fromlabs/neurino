@@ -6,18 +6,18 @@ import 'package:neurino/neurino.dart';
 main() {
   // model graph
 
-  var model = new ModelGraph();
+  var model = new ModelDescriptor();
 
-  var xInput = model.register(new PlaceHolderNode());
-  var yInput = model.register(new PlaceHolderNode());
-  var zVariable = model.register(new VariableNode());
+  var xInput = model.register(new PlaceHolder());
+  var yInput = model.register(new PlaceHolder());
+  var zVariable = model.register(new Variable());
 
-  var constant = model.register(new ConstantNode(-4));
+  var constant = model.register(new Constant(-4));
 
   var init = model.register(new VariableUpdateNode(zVariable, constant));
 
-  var add = model.register(new AddNode(xInput, yInput));
-  var mul = model.register(new MulNode(add, zVariable));
+  var add = model.register(new Add(xInput, yInput));
+  var mul = model.register(new Mul(add, zVariable));
 
   // model session
   var session = new ModelSession(model);

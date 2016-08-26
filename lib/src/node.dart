@@ -5,70 +5,69 @@ import "impl/node.dart";
 
 abstract class Node {}
 
-abstract class PlaceHolderNode implements Node {
-  factory PlaceHolderNode() => new PlaceHolderNodeImpl();
+abstract class PlaceHolder implements Node {
+  factory PlaceHolder() => new PlaceHolderImpl();
 }
 
-abstract class ConstantNode implements Node {
-  factory ConstantNode(value) => new ConstantNodeImpl(value);
-}
-
-abstract class VariableNode implements Node {
-  factory VariableNode() => new VariableNodeImpl();
+abstract class Variable implements Node {
+  factory Variable() => new VariableImpl();
 }
 
 abstract class VariableUpdateNode implements Node {
-  factory VariableUpdateNode(VariableNode variable, Node node) =>
-      new VariableUpdateNodeImpl(variable, node);
+  factory VariableUpdateNode(Variable variable, Node node) =>
+      new VariableUpdateImpl(variable, node);
 }
 
-class BatchNode implements Node {
-  factory BatchNode(List<Node> nodes) => new BatchNodeImpl(nodes);
+abstract class Constant implements Node {
+  factory Constant(value) => new ConstantNodeImpl(value);
 }
 
-abstract class AddNode implements Node {
-  factory AddNode(Node node1, Node node2) => new AddNodeImpl(node1, node2);
+class Batch implements Node {
+  factory Batch(List<Node> nodes) => new BatchImpl(nodes);
 }
 
-abstract class MulNode implements Node {
-  factory MulNode(Node node1, Node node2) => new MulNodeImpl(node1, node2);
+abstract class Memory implements Node {
+  factory Memory(Node node1, Node node2) => new MemoryImpl(node1, node2);
 }
 
-abstract class Loss1Node implements Node {
-  factory Loss1Node(Node node1, Node node2) => new Loss1NodeImpl(node1, node2);
+abstract class Add implements Node {
+  factory Add(Node node1, Node node2) => new AddImpl(node1, node2);
 }
 
-abstract class OptimizerNode implements Node {
-  factory OptimizerNode(Node node) => new OptimizerNodeImpl(node);
+abstract class Mul implements Node {
+  factory Mul(Node node1, Node node2) => new MulImpl(node1, node2);
 }
 
-abstract class MemoryNode implements Node {
-  factory MemoryNode(Node node1, Node node2) =>
-      new MemoryNodeImpl(node1, node2);
+abstract class Negate implements Node {
+  factory Negate(Node node) => new NegateImpl(node);
 }
 
-abstract class NegateNode implements Node {
-  factory NegateNode(Node node) => new NegateNodeImpl(node);
+abstract class Abs implements Node {
+  factory Abs(Node node) => new AbsImpl(node);
 }
 
-abstract class AbsNode implements Node {
-  factory AbsNode(Node node) => new AbsNodeImpl(node);
+abstract class Max implements Node {
+  factory Max(Node node1, Node node2) => new MaxImpl(node1, node2);
 }
 
-abstract class MaxNode implements Node {
-  factory MaxNode(Node node1, Node node2) => new MaxNodeImpl(node1, node2);
+abstract class Loss1 implements Node {
+  factory Loss1(Node node1, Node node2) => new Loss1Impl(node1, node2);
 }
 
-abstract class GreaterEqualNode implements Node {
-  factory GreaterEqualNode(Node node1, Node node2) =>
-      new GreaterEqualNodeImpl(node1, node2);
+abstract class GreaterEqual implements Node {
+  factory GreaterEqual(Node node1, Node node2) =>
+      new GreaterEqualImpl(node1, node2);
 }
 
-abstract class NotNode implements Node {
-  factory NotNode(Node node) => new NotNodeImpl(node);
+abstract class Not implements Node {
+  factory Not(Node node) => new NotImpl(node);
 }
 
-abstract class IfNode implements Node {
-  factory IfNode(Node ifNode, Node thenNode, Node elseNode) =>
-      new IfNodeImpl(ifNode, thenNode, elseNode);
+abstract class If implements Node {
+  factory If(Node ifNode, Node thenNode, Node elseNode) =>
+      new IfImpl(ifNode, thenNode, elseNode);
+}
+
+abstract class Optimizer implements Node {
+  factory Optimizer(Node node) => new OptimizerImpl(node);
 }

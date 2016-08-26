@@ -3,10 +3,10 @@
 
 import "node.dart";
 
-import "impl/model_graph.dart";
+import "impl/model_descriptor.dart";
 
-abstract class ModelGraph {
-  factory ModelGraph() => new ModelGraphImpl();
+abstract class ModelDescriptor {
+  factory ModelDescriptor() => new ModelDescriptorImpl();
 
-  Node register(Node node);
+  void asDefault(void scopedRunnable());
 }

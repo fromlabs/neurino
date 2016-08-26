@@ -2,14 +2,14 @@
 // is governed by a BSD-style license that can be found in the LICENSE file.
 
 import "node.dart";
-import "model_graph.dart";
+import "model_descriptor.dart";
 
-import "impl/model_session.dart";
+import "impl/session.dart";
 
 abstract class ModelSession {
-  factory ModelSession(ModelGraph graph) => new ModelSessionImpl(graph);
+  factory ModelSession(ModelDescriptor graph) => new ModelSessionImpl(graph);
 
-  run(Node target, Map<PlaceHolderNode, dynamic> inputs);
+  run(Node target, Map<PlaceHolder, dynamic> inputs);
 
   getEvaluation(Node target);
 }

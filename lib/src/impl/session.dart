@@ -1,14 +1,14 @@
 // Copyright (c) 2016, Roberto Tassi. All rights reserved. Use of this source code
 // is governed by a BSD-style license that can be found in the LICENSE file.
 
-import "../model_graph.dart";
-import "../model_session.dart";
+import "../model_descriptor.dart";
+import "../session.dart";
 import '../node.dart';
 
 import 'node.dart';
 
 class ModelSessionImpl implements ModelSession {
-  final ModelGraph _graph;
+  final ModelDescriptor _graph;
 
   ModelState _state;
 
@@ -18,7 +18,7 @@ class ModelSessionImpl implements ModelSession {
   getEvaluation(Node target) => _state.get(target).evaluation;
 
   @override
-  run(Node target, Map<PlaceHolderNode, dynamic> inputs) {
+  run(Node target, Map<PlaceHolder, dynamic> inputs) {
     _state = new ModelState(_state);
 
     _initializePlaceHolders(inputs);
@@ -28,9 +28,9 @@ class ModelSessionImpl implements ModelSession {
 
   NodeState _getNodeState(Node node) => _state.get(node);
 
-  void _initializePlaceHolders(Map<PlaceHolderNode, dynamic> inputs) {
+  void _initializePlaceHolders(Map<PlaceHolder, dynamic> inputs) {
     inputs.forEach((node, value) {
-      PlaceHolderNodeImpl holderImpl = node;
+      PlaceHolderImpl holderImpl = node;
 
       holderImpl.hold(value, _getNodeState(node));
     });
@@ -40,7 +40,7 @@ class ModelSessionImpl implements ModelSession {
     var targetState = _getNodeState(target);
     if (!targetState.isEvaluated) {
       var dependencyValues;
-      if (target is VariableUpdateNodeImpl) {
+      if (target is VariableUpdateImpl) {
         var value = _updateVariable(target.variable, target.input);
 
         dependencyValues = {target.variable: value, target.input: value};
@@ -55,7 +55,7 @@ class ModelSessionImpl implements ModelSession {
     return targetState.evaluation;
   }
 
-  _updateVariable(VariableNodeImpl target, NodeImpl source) {
+  _updateVariable(VariableImpl target, NodeImpl source) {
     var targetState = _getNodeState(target);
 
     var value = _evaluateNode(source);

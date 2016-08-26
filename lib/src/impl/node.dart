@@ -2,17 +2,17 @@
 // is governed by a BSD-style license that can be found in the LICENSE file.
 
 import "dart:math";
-import "../model_graph.dart";
+import "../model_descriptor.dart";
 import "../node.dart";
 
-import "model_session.dart";
+import "session.dart";
 
 abstract class NodeImpl implements Node {
   final List<Node> _dependencies;
 
   final List<NodeImpl> _dependants = [];
 
-  ModelGraph _graph;
+  ModelDescriptor _graph;
 
   NodeImpl(this._dependencies);
 
@@ -20,7 +20,7 @@ abstract class NodeImpl implements Node {
 
   bool get _isRegistered => _graph != null;
 
-  void registerModelGraph(ModelGraph graph) {
+  void registerModelGraph(ModelDescriptor graph) {
     if (_isRegistered) {
       throw new StateError("Node already registered");
     }
@@ -67,7 +67,7 @@ abstract class CompositeNodeImpl extends NodeImpl {
     state.evaluation = dependencyValues[_main];
   }
 
-  void registerModelGraph(ModelGraph graph) {
+  void registerModelGraph(ModelDescriptor graph) {
     for (var node in _internalNodes) {
       graph.register(node);
     }
@@ -76,10 +76,10 @@ abstract class CompositeNodeImpl extends NodeImpl {
   }
 }
 
-class PlaceHolderNodeImpl extends NodeImpl implements PlaceHolderNode {
+class PlaceHolderImpl extends NodeImpl implements PlaceHolder {
   static const String _HOLD_KEY = "_HOLD";
 
-  PlaceHolderNodeImpl() : super([]);
+  PlaceHolderImpl() : super([]);
 
   void hold(value, NodeState state) {
     state.setExecutionValue(_HOLD_KEY, value);
@@ -99,21 +99,10 @@ class PlaceHolderNodeImpl extends NodeImpl implements PlaceHolderNode {
   }
 }
 
-class ConstantNodeImpl extends NodeImpl implements ConstantNode {
-  final _value;
-
-  ConstantNodeImpl(this._value) : super([]);
-
-  @override
-  void evaluate(Map<Node, dynamic> dependencyValues, NodeState state) {
-    state.evaluation = _value;
-  }
-}
-
-class VariableNodeImpl extends NodeImpl implements VariableNode {
+class VariableImpl extends NodeImpl implements Variable {
   static const String _VAR_KEY = "_VAR";
 
-  VariableNodeImpl() : super([]);
+  VariableImpl() : super([]);
 
   @override
   void evaluate(Map<Node, dynamic> dependencyValues, NodeState state) {
@@ -139,10 +128,40 @@ class VariableNodeImpl extends NodeImpl implements VariableNode {
   }
 }
 
-class BatchNodeImpl extends NodeImpl implements BatchNode {
+class VariableUpdateImpl extends NodeImpl implements VariableUpdateNode {
+  final Variable _variable;
+  final Node _input;
+
+  VariableUpdateImpl(Variable variable, Node input)
+      : this._variable = variable,
+        this._input = input,
+        super([variable, input]);
+
+  Variable get variable => _variable;
+
+  Node get input => _input;
+
+  @override
+  void evaluate(Map<Node, dynamic> dependencyValues, NodeState state) {
+    state.evaluation = null;
+  }
+}
+
+class ConstantNodeImpl extends NodeImpl implements Constant {
+  final _value;
+
+  ConstantNodeImpl(this._value) : super([]);
+
+  @override
+  void evaluate(Map<Node, dynamic> dependencyValues, NodeState state) {
+    state.evaluation = _value;
+  }
+}
+
+class BatchImpl extends NodeImpl implements Batch {
   final List<Node> _inputs;
 
-  BatchNodeImpl(List<Node> inputs)
+  BatchImpl(List<Node> inputs)
       : this._inputs = inputs,
         super(inputs);
 
@@ -152,119 +171,13 @@ class BatchNodeImpl extends NodeImpl implements BatchNode {
   }
 }
 
-class AddNodeImpl extends NodeImpl implements AddNode {
-  final Node _input1;
-  final Node _input2;
-
-  AddNodeImpl(Node input1, Node input2)
-      : this._input1 = input1,
-        this._input2 = input2,
-        super([input1, input2]);
-
-  @override
-  void evaluate(Map<Node, dynamic> dependencyValues, NodeState state) {
-    state.evaluation = dependencyValues[_input1] + dependencyValues[_input2];
-  }
-}
-
-class MulNodeImpl extends NodeImpl implements MulNode {
-  final Node _input1;
-  final Node _input2;
-
-  MulNodeImpl(Node input1, Node input2)
-      : this._input1 = input1,
-        this._input2 = input2,
-        super([input1, input2]);
-
-  @override
-  void evaluate(Map<Node, dynamic> dependencyValues, NodeState state) {
-    state.evaluation = dependencyValues[_input1] * dependencyValues[_input2];
-  }
-}
-
-class MaxNodeImpl extends NodeImpl implements MaxNode {
-  final Node _input1;
-  final Node _input2;
-
-  MaxNodeImpl(Node input1, Node input2)
-      : this._input1 = input1,
-        this._input2 = input2,
-        super([input1, input2]);
-
-  @override
-  void evaluate(Map<Node, dynamic> dependencyValues, NodeState state) {
-    state.evaluation =
-        max(dependencyValues[_input1], dependencyValues[_input2]);
-  }
-}
-
-class GreaterEqualNodeImpl extends NodeImpl implements GreaterEqualNode {
-  final Node _input1;
-  final Node _input2;
-
-  GreaterEqualNodeImpl(Node input1, Node input2)
-      : this._input1 = input1,
-        this._input2 = input2,
-        super([input1, input2]);
-
-  @override
-  void evaluate(Map<Node, dynamic> dependencyValues, NodeState state) {
-    state.evaluation = dependencyValues[_input1] >= dependencyValues[_input2];
-  }
-}
-
-class NotNodeImpl extends NodeImpl implements NotNode {
-  final Node _input;
-
-  NotNodeImpl(Node input)
-      : this._input = input,
-        super([input]);
-
-  @override
-  void evaluate(Map<Node, dynamic> dependencyValues, NodeState state) {
-    state.evaluation = !dependencyValues[_input];
-  }
-}
-
-class IfNodeImpl extends NodeImpl implements IfNode {
-  final Node _ifInput;
-  final Node _thenInput;
-  final Node _elseInput;
-
-  IfNodeImpl(Node ifInput, Node thenInput, Node elseInput)
-      : this._ifInput = ifInput,
-        this._thenInput = thenInput,
-        this._elseInput = elseInput,
-        super([ifInput, thenInput, elseInput]);
-
-  @override
-  void evaluate(Map<Node, dynamic> dependencyValues, NodeState state) {
-    state.evaluation = dependencyValues[_ifInput]
-        ? dependencyValues[_thenInput]
-        : dependencyValues[_elseInput];
-  }
-}
-
-class Loss1NodeImpl extends CompositeNodeImpl implements Loss1Node {
-  factory Loss1NodeImpl(Node input1, Node input2) {
-    var negate = new NegateNode(input2);
-    var add = new AddNode(input1, negate);
-    var loss1 = new AbsNode(add);
-
-    return new Loss1NodeImpl._(loss1, [negate, add, loss1]);
-  }
-
-  Loss1NodeImpl._(Node main, List<Node> internalNodes)
-      : super.internal(main, internalNodes);
-}
-
-class MemoryNodeImpl extends NodeImpl implements MemoryNode {
+class MemoryImpl extends NodeImpl implements Memory {
   static const String _MEM_KEY = "_MEM";
 
   final Node _input;
   final Node _initial;
 
-  MemoryNodeImpl(Node input, Node initial)
+  MemoryImpl(Node input, Node initial)
       : this._input = input,
         this._initial = initial,
         super([input, initial]);
@@ -279,10 +192,40 @@ class MemoryNodeImpl extends NodeImpl implements MemoryNode {
   }
 }
 
-class NegateNodeImpl extends NodeImpl implements NegateNode {
+class AddImpl extends NodeImpl implements Add {
+  final Node _input1;
+  final Node _input2;
+
+  AddImpl(Node input1, Node input2)
+      : this._input1 = input1,
+        this._input2 = input2,
+        super([input1, input2]);
+
+  @override
+  void evaluate(Map<Node, dynamic> dependencyValues, NodeState state) {
+    state.evaluation = dependencyValues[_input1] + dependencyValues[_input2];
+  }
+}
+
+class MulImpl extends NodeImpl implements Mul {
+  final Node _input1;
+  final Node _input2;
+
+  MulImpl(Node input1, Node input2)
+      : this._input1 = input1,
+        this._input2 = input2,
+        super([input1, input2]);
+
+  @override
+  void evaluate(Map<Node, dynamic> dependencyValues, NodeState state) {
+    state.evaluation = dependencyValues[_input1] * dependencyValues[_input2];
+  }
+}
+
+class NegateImpl extends NodeImpl implements Negate {
   final Node _input;
 
-  NegateNodeImpl(Node input)
+  NegateImpl(Node input)
       : this._input = input,
         super([input]);
 
@@ -292,10 +235,10 @@ class NegateNodeImpl extends NodeImpl implements NegateNode {
   }
 }
 
-class AbsNodeImpl extends NodeImpl implements AbsNode {
+class AbsImpl extends NodeImpl implements Abs {
   final Node _input;
 
-  AbsNodeImpl(Node input)
+  AbsImpl(Node input)
       : this._input = input,
         super([input]);
 
@@ -306,29 +249,86 @@ class AbsNodeImpl extends NodeImpl implements AbsNode {
   }
 }
 
-class VariableUpdateNodeImpl extends NodeImpl implements VariableUpdateNode {
-  final VariableNode _variable;
-  final Node _input;
+class MaxImpl extends NodeImpl implements Max {
+  final Node _input1;
+  final Node _input2;
 
-  VariableUpdateNodeImpl(VariableNode variable, Node input)
-      : this._variable = variable,
-        this._input = input,
-        super([variable, input]);
-
-  VariableNode get variable => _variable;
-
-  Node get input => _input;
+  MaxImpl(Node input1, Node input2)
+      : this._input1 = input1,
+        this._input2 = input2,
+        super([input1, input2]);
 
   @override
   void evaluate(Map<Node, dynamic> dependencyValues, NodeState state) {
-    state.evaluation = null;
+    state.evaluation =
+        max(dependencyValues[_input1], dependencyValues[_input2]);
   }
 }
 
-class OptimizerNodeImpl extends NodeImpl implements OptimizerNode {
+class Loss1Impl extends CompositeNodeImpl implements Loss1 {
+  factory Loss1Impl(Node input1, Node input2) {
+    var negate = new Negate(input2);
+    var add = new Add(input1, negate);
+    var loss1 = new Abs(add);
+
+    return new Loss1Impl._(loss1, [negate, add, loss1]);
+  }
+
+  Loss1Impl._(Node main, List<Node> internalNodes)
+      : super.internal(main, internalNodes);
+}
+
+class GreaterEqualImpl extends NodeImpl implements GreaterEqual {
+  final Node _input1;
+  final Node _input2;
+
+  GreaterEqualImpl(Node input1, Node input2)
+      : this._input1 = input1,
+        this._input2 = input2,
+        super([input1, input2]);
+
+  @override
+  void evaluate(Map<Node, dynamic> dependencyValues, NodeState state) {
+    state.evaluation = dependencyValues[_input1] >= dependencyValues[_input2];
+  }
+}
+
+class NotImpl extends NodeImpl implements Not {
   final Node _input;
 
-  OptimizerNodeImpl(Node input)
+  NotImpl(Node input)
+      : this._input = input,
+        super([input]);
+
+  @override
+  void evaluate(Map<Node, dynamic> dependencyValues, NodeState state) {
+    state.evaluation = !dependencyValues[_input];
+  }
+}
+
+class IfImpl extends NodeImpl implements If {
+  final Node _ifInput;
+  final Node _thenInput;
+  final Node _elseInput;
+
+  IfImpl(Node ifInput, Node thenInput, Node elseInput)
+      : this._ifInput = ifInput,
+        this._thenInput = thenInput,
+        this._elseInput = elseInput,
+        super([ifInput, thenInput, elseInput]);
+
+  @override
+  void evaluate(Map<Node, dynamic> dependencyValues, NodeState state) {
+    state.evaluation = dependencyValues[_ifInput]
+        ? dependencyValues[_thenInput]
+        : dependencyValues[_elseInput];
+  }
+}
+
+class OptimizerImpl extends NodeImpl implements Optimizer {
+  final Node _input;
+
+  OptimizerImpl(Node input)
       : this._input = input,
         super([input]);
 

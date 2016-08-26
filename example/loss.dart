@@ -6,23 +6,23 @@ import 'package:neurino/neurino.dart';
 main() {
   /* MODEL GRAPH */
 
-  var model = new ModelGraph();
+  var model = new ModelDescriptor();
 
-  var x = model.register(new PlaceHolderNode());
-  var w = model.register(new VariableNode());
-  var b = model.register(new VariableNode());
+  var x = model.register(new PlaceHolder());
+  var w = model.register(new Variable());
+  var b = model.register(new Variable());
 
-  var w0 = model.register(new ConstantNode(0));
-  var b0 = model.register(new ConstantNode(0));
+  var w0 = model.register(new Constant(0));
+  var b0 = model.register(new Constant(0));
   var wInit = model.register(new VariableUpdateNode(w, w0));
   var bInit = model.register(new VariableUpdateNode(b, b0));
-  var init = model.register(new BatchNode([wInit, bInit]));
+  var init = model.register(new Batch([wInit, bInit]));
 
-  var mul = model.register(new MulNode(x, w));
-  var yPredicted = model.register(new AddNode(mul, b));
-  var yReal = model.register(new PlaceHolderNode());
+  var mul = model.register(new Mul(x, w));
+  var yPredicted = model.register(new Add(mul, b));
+  var yReal = model.register(new PlaceHolder());
 
-  var loss = model.register(new Loss1Node(yPredicted, yReal));
+  var loss = model.register(new Loss1(yPredicted, yReal));
 
   /* MODEL SESSION */
 

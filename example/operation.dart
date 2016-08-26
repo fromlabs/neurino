@@ -3,6 +3,8 @@
 
 import 'package:neurino/neurino.dart';
 
+import "dart:async";
+
 main() {
   // model graph
 
@@ -10,7 +12,7 @@ main() {
 
   var xInput = model.register(new PlaceHolder());
   var yInput = model.register(new PlaceHolder());
-  var zInput = model.register(new Constant(-4));
+  var zInput = model.register(new PlaceHolder());
 
   var add = model.register(new Add(xInput, yInput));
   var mul = model.register(new Mul(add, zInput));
@@ -20,7 +22,7 @@ main() {
   var session = new ModelSession(model);
 
   // evaluation
-  var mulValue = session.run(mul, {xInput: -2, yInput: 5});
+  var mulValue = session.run(mul, {xInput: -2, yInput: 5, zInput: -4});
 
   print(mulValue);
 
@@ -29,4 +31,6 @@ main() {
   print(session.getEvaluation(zInput));
   print(session.getEvaluation(add));
   print(session.getEvaluation(mul));
+
+  // TODO implementare le variabili
 }

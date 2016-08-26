@@ -6,29 +6,31 @@ import 'package:neurino/neurino.dart';
 main() {
   // model graph
 
-  var model = new ModelGraph();
+  var xInput;
+  var yInput;
+  var zInput;
+  var add;
+  var mul;
+  var model = new ModelDescriptor();
+  model.asDefault(() {
+    xInput = new PlaceHolder();
+    yInput = new PlaceHolder();
+    zInput = new PlaceHolder();
 
-  var xInput = model.register(new PlaceHolderNode());
-  var yInput = model.register(new PlaceHolderNode());
-  var zInput = model.register(new PlaceHolderNode());
-
-  var add = model.register(new AddNode(xInput, yInput));
-  var mul = model.register(new MulNode(add, zInput));
+    add = new Add(xInput, yInput);
+    mul = new Mul(add, zInput);
+  });
 
   // model session
-
   var session = new ModelSession(model);
+  session.asDefault(() {
+    // evaluation
+    print(session.run(mul, {xInput: -2, yInput: 5, zInput: -4}));
 
-  // evaluation
-  var mulValue = session.run(mul, {xInput: -2, yInput: 5, zInput: -4});
-
-  print(mulValue);
-
-  print(session.getEvaluation(xInput));
-  print(session.getEvaluation(yInput));
-  print(session.getEvaluation(zInput));
-  print(session.getEvaluation(add));
-  print(session.getEvaluation(mul));
-
-  // TODO implementare le variabili
+    print(session.getEvaluation(xInput));
+    print(session.getEvaluation(yInput));
+    print(session.getEvaluation(zInput));
+    print(session.getEvaluation(add));
+    print(session.getEvaluation(mul));
+  });
 }
