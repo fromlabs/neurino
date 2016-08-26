@@ -8,30 +8,30 @@ main() {
 
   var model = new ModelDescriptor();
 
-  var xInput = model.register(new Variable());
-  var yInput = model.register(new Constant(2));
+  var xInput = model.registerNode(new Variable());
+  var yInput = model.registerNode(new Constant(2));
 
-  var xInitial = model.register(new Constant(1));
-  var init = model.register(new VariableUpdateNode(xInput, xInitial));
+  var xInitial = model.registerNode(new Constant(1));
+  var init = model.registerNode(new VariableUpdate(xInput, xInitial));
 
-  var mul = model.register(new Mul(xInput, yInput));
-  var update = model.register(new VariableUpdateNode(xInput, mul));
+  var mul = model.registerNode(new Mul(xInput, yInput));
+  var update = model.registerNode(new VariableUpdate(xInput, mul));
 
-  var batch = model.register(new Batch([xInput, yInput, update]));
+  var batch = model.registerNode(new Batch([xInput, yInput, update]));
 
   /* MODEL SESSION */
 
-  var session = new ModelSession(model);
+  var session = new Session(model);
 
   // init
-  print(session.run(init, {}));
+  print(session.run(init));
 
   // update step
-  print(session.run(batch, {}));
+  print(session.run(batch));
 
   // update step
-  print(session.run(batch, {}));
+  print(session.run(batch));
 
   // update step
-  print(session.run(batch, {}));
+  print(session.run(batch));
 }

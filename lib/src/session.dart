@@ -6,10 +6,11 @@ import "model_descriptor.dart";
 
 import "impl/session.dart";
 
-abstract class ModelSession {
-  factory ModelSession(ModelDescriptor graph) => new ModelSessionImpl(graph);
+abstract class Session {
+  factory Session([ModelDescriptor descriptor]) =>
+      new SessionImpl(descriptor);
 
-  run(Node target, Map<PlaceHolder, dynamic> inputs);
+  run(Node target, {Map<Input, dynamic> inputs: const {}});
 
-  getEvaluation(Node target);
+  getEvaluation(Node node);
 }

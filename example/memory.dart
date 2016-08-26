@@ -15,22 +15,22 @@ main() {
 
   var model = new ModelDescriptor();
 
-  var x = model.register(new PlaceHolder());
+  var x = model.registerNode(new Input());
 
-  var y0 = model.register(new Constant(0));
+  var y0 = model.registerNode(new Constant(0));
 
   var y = x;
-  var y1 = model.register(new Memory(y, y0));
-  var y2 = model.register(new Memory(y1, y0));
+  var y1 = model.registerNode(new Memory(y, y0));
+  var y2 = model.registerNode(new Memory(y1, y0));
 
-  var ys = model.register(new Batch([y, y1, y2]));
+  var ys = model.registerNode(new Batch([y, y1, y2]));
 
   // model session
 
-  var session = new ModelSession(model);
+  var session = new Session(model);
 
-  print(session.run(ys, {x: 1}));
-  print(session.run(ys, {x: 2}));
-  print(session.run(ys, {x: 3}));
-  print(session.run(ys, {x: 4}));
+  print(session.run(ys, inputs: {x: 1}));
+  print(session.run(ys, inputs: {x: 2}));
+  print(session.run(ys, inputs: {x: 3}));
+  print(session.run(ys, inputs: {x: 4}));
 }

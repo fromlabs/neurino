@@ -13,19 +13,19 @@ main() {
   var mul;
   var model = new ModelDescriptor();
   model.asDefault(() {
-    xInput = new PlaceHolder();
-    yInput = new PlaceHolder();
-    zInput = new PlaceHolder();
+    xInput = new Input();
+    yInput = new Input();
+    zInput = new Input();
 
     add = new Add(xInput, yInput);
     mul = new Mul(add, zInput);
   });
 
   // model session
-  var session = new ModelSession(model);
+  var session = new Session(model);
   session.asDefault(() {
     // evaluation
-    print(session.run(mul, {xInput: -2, yInput: 5, zInput: -4}));
+    print(session.run(mul, inputs: {xInput: -2, yInput: 5, zInput: -4}));
 
     print(session.getEvaluation(xInput));
     print(session.getEvaluation(yInput));

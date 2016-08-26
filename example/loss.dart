@@ -8,29 +8,29 @@ main() {
 
   var model = new ModelDescriptor();
 
-  var x = model.register(new PlaceHolder());
-  var w = model.register(new Variable());
-  var b = model.register(new Variable());
+  var x = model.registerNode(new Input());
+  var w = model.registerNode(new Variable());
+  var b = model.registerNode(new Variable());
 
-  var w0 = model.register(new Constant(0));
-  var b0 = model.register(new Constant(0));
-  var wInit = model.register(new VariableUpdateNode(w, w0));
-  var bInit = model.register(new VariableUpdateNode(b, b0));
-  var init = model.register(new Batch([wInit, bInit]));
+  var w0 = model.registerNode(new Constant(0));
+  var b0 = model.registerNode(new Constant(0));
+  var wInit = model.registerNode(new VariableUpdate(w, w0));
+  var bInit = model.registerNode(new VariableUpdate(b, b0));
+  var init = model.registerNode(new Batch([wInit, bInit]));
 
-  var mul = model.register(new Mul(x, w));
-  var yPredicted = model.register(new Add(mul, b));
-  var yReal = model.register(new PlaceHolder());
+  var mul = model.registerNode(new Mul(x, w));
+  var yPredicted = model.registerNode(new Add(mul, b));
+  var yReal = model.registerNode(new Input());
 
-  var loss = model.register(new Loss1(yPredicted, yReal));
+  var loss = model.registerNode(new Loss1(yPredicted, yReal));
 
   /* MODEL SESSION */
 
-  var session = new ModelSession(model);
+  var session = new Session(model);
 
   // init
-  session.run(init, {});
+  session.run(init);
 
   // step
-  print(session.run(loss, {x: 1, yReal: 1}));
+  print(session.run(loss, inputs: {x: 1, yReal: 1}));
 }

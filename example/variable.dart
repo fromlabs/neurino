@@ -8,25 +8,25 @@ main() {
 
   var model = new ModelDescriptor();
 
-  var xInput = model.register(new PlaceHolder());
-  var yInput = model.register(new PlaceHolder());
-  var zVariable = model.register(new Variable());
+  var xInput = model.registerNode(new Input());
+  var yInput = model.registerNode(new Input());
+  var zVariable = model.registerNode(new Variable());
 
-  var constant = model.register(new Constant(-4));
+  var constant = model.registerNode(new Constant(-4));
 
-  var init = model.register(new VariableUpdateNode(zVariable, constant));
+  var init = model.registerNode(new VariableUpdate(zVariable, constant));
 
-  var add = model.register(new Add(xInput, yInput));
-  var mul = model.register(new Mul(add, zVariable));
+  var add = model.registerNode(new Add(xInput, yInput));
+  var mul = model.registerNode(new Mul(add, zVariable));
 
   // model session
-  var session = new ModelSession(model);
+  var session = new Session(model);
 
   // init
-  session.run(init, {});
+  session.run(init);
 
   print(session.getEvaluation(zVariable));
 
   // evaluation
-  print(session.run(mul, {xInput: -2, yInput: 5}));
+  print(session.run(mul, inputs: {xInput: -2, yInput: 5}));
 }
