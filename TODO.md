@@ -10,21 +10,21 @@
 + identificazione nodi
 + check univocità identificativi (il descrittore deve controllare tutti i nodi creati)
 
-- stato del descrittore come raccolta di tutti gli stati dei nodi del descrittore
-- stato di un nodo: ogni nodo definisce il proprio stato e le modalità di ereditarietà da quello precedente
-- sessione come coppia descrittore, stato
-- evaluation
++ stato del descrittore come raccolta di tutti gli stati dei nodi del descrittore
++ stato di un nodo: ogni nodo definisce il proprio stato e le modalità di ereditarietà da quello precedente
++ sessione come coppia descrittore, stato
++ evaluation
 
-- variable update
-- relazione tra nodi (che tipi di relazione esistono? pensa anche al variableupdate...)
++ variable update
++ Evitare utilizzo delle costanti magari con wrapper automatici
 
 - Calcolo del gradiente con backprop
 - Aggiornamento delle variabili con gradiente calcolato dalla backprop
 - Distinzione tra azioni e valutazioni
 
+- relazione tra nodi (che tipi di relazione esistono? pensa anche al variableupdate...)
 - metodi per navigare il descrittore
 - testare anche lo strong mode
 
-- Evitare utilizzo delle costanti magari con wrapper automatici
 - Matrici n-dimensionali come valori
 - Override degli operatori più comuni

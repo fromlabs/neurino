@@ -3,31 +3,22 @@
 
 import 'package:neurino/neurino.dart';
 
-// 1+2
-// 2+3
-// 3+4
-// 4+5
-// 5+6
-// 7+8
-
 main() {
   // model graph
 
-  var model = new ModelDescriptor();
+  var x = new Input();
 
-  var x = model.registerNode(new Input());
-
-  var y0 = model.registerNode(new Constant(0));
+  var y0 = new Constant(0);
 
   var y = x;
-  var y1 = model.registerNode(new Memory(y, y0));
-  var y2 = model.registerNode(new Memory(y1, y0));
+  var y1 = new Memory(y, y0);
+  var y2 = new Memory(y1, y0);
 
-  var ys = model.registerNode(new Batch([y, y1, y2]));
+  var ys = new Batch([y, y1, y2]);
 
   // model session
 
-  var session = new Session(model);
+  var session = new Session();
 
   print(session.run(ys, inputs: {x: 1}));
   print(session.run(ys, inputs: {x: 2}));

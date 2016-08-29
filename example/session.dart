@@ -16,8 +16,8 @@ main() {
   var loss1 = new Loss1(yPredicted1, yReal1);
 
   var initVariables = new Batch([
-    new VariableUpdate(w1, new Constant(1)),
-    new VariableUpdate(b1, new Constant(0))
+    new VariableUpdate(w1, 1),
+    new VariableUpdate(b1, 0)
   ]);
 
   // model session
@@ -25,7 +25,7 @@ main() {
   var session = new Session();
 
   try {
-    print(session.getEvaluation(k));
+    print(session[k]);
 
     throw new AssertionError();
   } on StateError {
@@ -57,7 +57,7 @@ main() {
   }
 
   try {
-    print(session.getEvaluation(w1));
+    print(session[w1]);
 
     throw new AssertionError();
   } on StateError {
@@ -67,7 +67,7 @@ main() {
   print(session.run(x1, inputs: {x1: -2, yReal1: 5}));
 
   try {
-    print(session.getEvaluation(w1));
+    print(session[w1]);
 
     throw new AssertionError();
   } on StateError {
@@ -75,15 +75,15 @@ main() {
   }
 
   print(session.run(initVariables));
-  print(session.getEvaluation(w1));
+  print(session[w1]);
 
   print(session.run(loss1, inputs: {x1: -2, yReal1: 5}));
-  print(session.getEvaluation(loss1));
-  print(session.getEvaluation(yReal1));
-  print(session.getEvaluation(yPredicted1));
-  print(session.getEvaluation(mul1));
-  print(session.getEvaluation(b1));
-  print(session.getEvaluation(w1));
-  print(session.getEvaluation(x1));
-  print(session.getEvaluation(k));
+  print(session[loss1]);
+  print(session[yReal1]);
+  print(session[yPredicted1]);
+  print(session[mul1]);
+  print(session[b1]);
+  print(session[w1]);
+  print(session[x1]);
+  print(session[k]);
 }

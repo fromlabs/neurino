@@ -5,6 +5,10 @@ import "impl/node.dart";
 
 abstract class Node {}
 
+abstract class Constant implements Node {
+  factory Constant(value, {String id}) => new ConstantImpl(value, id: id);
+}
+
 abstract class Input implements Node {
   factory Input({String id}) => new InputImpl(id: id);
 }
@@ -14,6 +18,6 @@ abstract class Variable implements Node {
 }
 
 abstract class VariableUpdate implements Node {
-  factory VariableUpdate(Variable variable, Node node, {String id}) =>
-      new VariableUpdateImpl(variable, node, id: id);
+  factory VariableUpdate(Variable variable, value, {String id}) =>
+      new VariableUpdateImpl(variable, value, id: id);
 }

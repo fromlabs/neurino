@@ -4,16 +4,19 @@
 import "dart:async";
 
 import "../model_descriptor.dart";
+import "../node.dart";
 
 import "node.dart";
 
 const String _DEFAULT_DESCRIPTOR_KEY = "_DEFAULT_DESCRIPTOR";
-final ModelDescriptorImpl _DEFAULT_DESCRIPTOR = new ModelDescriptorImpl();
+final ModelDescriptorImpl _DEFAULT_DESCRIPTOR = new ModelDescriptor();
 
 ModelDescriptorImpl get defaultDescriptor =>
     Zone.current[_DEFAULT_DESCRIPTOR_KEY] ?? _DEFAULT_DESCRIPTOR;
 
 String autoId(String nodeType) => defaultDescriptor.autoId(nodeType);
+
+NodeImpl toNode(value) => value is NodeImpl ? value : new Constant(value);
 
 class ModelDescriptorImpl implements ModelDescriptor {
   final Map<String, int> _autoNodeIds = {};

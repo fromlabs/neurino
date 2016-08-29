@@ -1,7 +1,6 @@
 // Copyright (c) 2016, Roberto Tassi. All rights reserved. Use of this source code
 // is governed by a BSD-style license that can be found in the LICENSE file.
 
-import "../model_descriptor.dart";
 import "../session.dart";
 import '../node.dart';
 
@@ -18,7 +17,7 @@ class SessionImpl implements Session {
       : this._descriptor = descriptor ?? defaultDescriptor;
 
   @override
-  getEvaluation(Node node) {
+  operator [](Node node) {
     _checkState();
 
     NodeImpl nodeImpl = node;
@@ -48,9 +47,9 @@ class SessionImpl implements Session {
   evaluateNode(NodeImpl target) {
     var targetState = getNodeState(target);
     if (!target.isEvaluated(targetState)) {
-      if (target is ActionNodeImpl) {
+      if (target is SessionNodeImpl) {
         target.evaluate(this);
-      } else if (target is EvaluationNodeImpl) {
+      } else if (target is LocalNodeImpl) {
         var dependencyValues = new Map.fromIterable(
             _descriptor.getNodeDependencies(target),
             value: (dependencyTarget) => evaluateNode(dependencyTarget));
@@ -86,7 +85,7 @@ class SessionImpl implements Session {
     inputs.forEach((node, value) {
       InputImpl holderImpl = node;
 
-      holderImpl.updateEvaluation(value, getNodeState(node));
+      holderImpl.updateEvaluation(value, getNodeState(holderImpl));
     });
   }
 }
