@@ -2,14 +2,14 @@
 // is governed by a BSD-style license that can be found in the LICENSE file.
 
 import "node.dart";
-import "model_descriptor.dart";
+import "model.dart";
 
 import "impl/session.dart";
 
 abstract class Session {
-  factory Session([ModelDescriptor descriptor]) => new SessionImpl(descriptor);
+  factory Session([Model model]) => new SessionImpl(model);
 
-  run(Node target, {Map<Input, dynamic> inputs: const {}});
+  void asDefault(void scopedRunnable());
 
-  operator [](Node node);
+  run(Node target, {Map<ModelInput, dynamic> inputs: const {}});
 }

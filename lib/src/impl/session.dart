@@ -1,40 +1,48 @@
 // Copyright (c) 2016, Roberto Tassi. All rights reserved. Use of this source code
 // is governed by a BSD-style license that can be found in the LICENSE file.
 
-import "../session.dart";
-import '../node.dart';
+import "dart:async";
 
-import "model_descriptor.dart";
-import "model_state.dart";
+import "../node.dart";
+import "../session.dart";
+
+import "container.dart";
+import "model.dart";
 import 'node.dart';
 
+const String _defaultSessionKey = "_DEFAULT_SESSION";
+
+SessionImpl get defaultSession => Zone.current[_defaultSessionKey];
+
 class SessionImpl implements Session {
-  final ModelDescriptorImpl _descriptor;
+  final ModelImpl _model;
 
   ModelState _state;
 
-  SessionImpl(ModelDescriptorImpl descriptor)
-      : this._descriptor = descriptor ?? defaultDescriptor;
+  SessionImpl([ModelImpl model]) : this._model = model ?? defaultModel;
 
-  @override
-  operator [](Node node) {
-    _checkState();
-
-    NodeImpl nodeImpl = node;
-
-    return nodeImpl.getEvaluation(getNodeState(node));
+  void asDefault(void scopedRunnable()) {
+    if (defaultContainer != _model) {
+      _model.asDefault(() {
+        runZoned(scopedRunnable, zoneValues: {_defaultSessionKey: this});
+      });
+    } else {
+      runZoned(scopedRunnable, zoneValues: {_defaultSessionKey: this});
+    }
   }
 
   @override
-  run(Node target, {Map<Input, dynamic> inputs: const {}}) {
+  run(Node target, {Map<ModelInput, dynamic> inputs: const {}}) {
     var previousState = _state;
 
     try {
-      _state = _prepareNewState(previousState);
+      _state = new ModelState(previousState);
 
-      _initializePlaceholders(inputs);
+      _initializeModelInputs(inputs);
 
-      return evaluateNode(target);
+      BaseNodeImpl impl = target;
+
+      return impl.evaluate();
     } catch (e) {
       _state = previousState;
 
@@ -42,50 +50,53 @@ class SessionImpl implements Session {
     }
   }
 
-  NodeState getNodeState(NodeImpl node) => _state.get(node);
+  NodeState getNodeState(BaseNodeImpl node) =>
+      _state != null ? _state[node] : null;
 
-  evaluateNode(NodeImpl target) {
-    var targetState = getNodeState(target);
-    if (!target.isEvaluated(targetState)) {
-      if (target is SessionNodeImpl) {
-        target.evaluate(this);
-      } else if (target is LocalNodeImpl) {
-        var dependencyValues = new Map.fromIterable(
-            _descriptor.getNodeDependencies(target),
-            value: (dependencyTarget) => evaluateNode(dependencyTarget));
+  void _initializeModelInputs(Map<ModelInput, dynamic> inputs) {
+    inputs.forEach((node, value) {
+      ModelInputImpl inputImpl = node;
 
-        target.evaluate(dependencyValues, targetState);
-      }
-    }
-
-    return target.getEvaluation(targetState);
+      inputImpl.updateEvaluation(value);
+    });
   }
+}
 
-  void _checkState() {
-    if (_state == null) {
-      throw new StateError("Session not runned yet");
-    }
-  }
+class ModelState {
+  final Map<BaseNodeImpl, NodeState> _states = {};
 
-  ModelState _prepareNewState(ModelState previousState) {
-    var newState = new ModelState();
-
+  ModelState(ModelState previousState) {
     if (previousState != null) {
-      _descriptor.nodes
-          .where((node) => previousState.contains(node))
-          .forEach((node) {
-        node.initializeState(newState.get(node), previousState.get(node));
+      previousState._states.forEach((node, previousState) {
+        node.initializeState(this[node], previousState);
       });
     }
-
-    return newState;
   }
 
-  void _initializePlaceholders(Map<Input, dynamic> inputs) {
-    inputs.forEach((node, value) {
-      InputImpl holderImpl = node;
+  bool contains(BaseNodeImpl node) => _states.containsKey(node);
 
-      holderImpl.updateEvaluation(value, getNodeState(holderImpl));
-    });
+  NodeState operator [](BaseNodeImpl node) =>
+      _states.putIfAbsent(node, () => new NodeState());
+}
+
+class NodeState {
+  static const String _EVALUATION_KEY = "_EVALUATION";
+
+  final Map<dynamic, dynamic> _values = {};
+
+  bool get isEvaluated => contains(_EVALUATION_KEY);
+
+  get evaluation => this[_EVALUATION_KEY];
+
+  void set evaluation(value) {
+    this[_EVALUATION_KEY] = value;
+  }
+
+  bool contains(key) => _values.containsKey(key);
+
+  operator [](key) => _values[key];
+
+  void operator []=(key, value) {
+    _values[key] = value;
   }
 }

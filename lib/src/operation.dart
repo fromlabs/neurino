@@ -5,57 +5,48 @@ import "node.dart";
 
 import "impl/operation.dart";
 
-class Batch implements Node {
-  factory Batch(List<Node> nodes, {String id}) => new BatchImpl(nodes);
+abstract class Batch implements Node {
+  factory Batch(List<Node> inputs, {String id}) => new BatchImpl(inputs);
 }
 
 abstract class Memory implements Node {
-  factory Memory(node1, node2, {String id}) =>
-      new MemoryImpl(node1, node2, id: id);
+  factory Memory(input, initial, {String id}) =>
+      new MemoryImpl(input, initial, id: id);
 }
 
 abstract class Add implements Node {
-  factory Add(node1, node2, {String id}) =>
-      new AddImpl(node1, node2, id: id);
+  factory Add(input1, input2, {String id}) =>
+      new AddImpl(input1, input2, id: id);
 }
 
 abstract class Mul implements Node {
-  factory Mul(node1, node2, {String id}) =>
-      new MulImpl(node1, node2, id: id);
+  factory Mul(input1, input2, {String id}) =>
+      new MulImpl(input1, input2, id: id);
 }
 
 abstract class Negate implements Node {
-  factory Negate(node, {String id}) => new NegateImpl(node, id: id);
+  factory Negate(input, {String id}) => new NegateImpl(input, id: id);
 }
 
 abstract class Abs implements Node {
-  factory Abs(node, {String id}) => new AbsImpl(node, id: id);
+  factory Abs(input, {String id}) => new AbsImpl(input, id: id);
 }
 
 abstract class Max implements Node {
-  factory Max(node1, node2, {String id}) =>
-      new MaxImpl(node1, node2, id: id);
-}
-
-abstract class Loss1 implements Node {
-  factory Loss1(node1, node2, {String id}) =>
-      new Loss1Impl(node1, node2, id: id);
+  factory Max(input1, input2, {String id}) =>
+      new MaxImpl(input1, input2, id: id);
 }
 
 abstract class GreaterEqual implements Node {
-  factory GreaterEqual(node1, node2, {String id}) =>
-      new GreaterEqualImpl(node1, node2, id: id);
+  factory GreaterEqual(input1, input2, {String id}) =>
+      new GreaterEqualImpl(input1, input2, id: id);
 }
 
 abstract class Not implements Node {
-  factory Not(node, {String id}) => new NotImpl(node, id: id);
+  factory Not(input, {String id}) => new NotImpl(input, id: id);
 }
 
 abstract class If implements Node {
-  factory If(ifNode, thenNode, elseNode, {String id}) =>
-      new IfImpl(ifNode, thenNode, elseNode, id: id);
-}
-
-abstract class Optimizer implements Node {
-  factory Optimizer(Node node, {String id}) => new OptimizerImpl(node, id: id);
+  factory If(ifInput, thenInput, elseInput, {String id}) =>
+      new IfImpl(ifInput, thenInput, elseInput, id: id);
 }

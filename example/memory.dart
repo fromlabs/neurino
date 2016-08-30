@@ -6,7 +6,7 @@ import 'package:neurino/neurino.dart';
 main() {
   // model graph
 
-  var x = new Input();
+  var x = new ModelInput();
 
   var y0 = new Constant(0);
 

@@ -4,7 +4,7 @@
 import 'package:neurino/neurino.dart';
 
 main() {
-  var x1 = new Input(id: "x");
+  var x1 = new ModelInput(id: "x");
 
   try {
     print(new Constant(0, id: "x"));
@@ -14,7 +14,7 @@ main() {
     // pass
   }
 
-  var yReal1 = new Input();
+  var yReal1 = new ModelInput();
   var w1 = new Variable();
   var b1 = new Variable();
 
@@ -35,8 +35,8 @@ main() {
       // pass
     }
 
-    var x2 = new Input(id: "x");
-    var yReal2 = new Input();
+    var x2 = new ModelInput(id: "x");
+    var yReal2 = new ModelInput();
     var w2 = new Variable();
     var b2 = new Variable();
 

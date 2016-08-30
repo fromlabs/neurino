@@ -6,10 +6,10 @@ import 'package:neurino/neurino.dart';
 main() {
   /* MODEL GRAPH */
 
-  var x = new Input();
-  var y = new Input();
-  var z = new Input();
-  var w = new Input();
+  var x = new ModelInput();
+  var y = new ModelInput();
+  var z = new ModelInput();
+  var w = new ModelInput();
 
   var mul1 = new Mul(x, y);
   var max1 = new Max(z, w);

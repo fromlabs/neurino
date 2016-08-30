@@ -6,13 +6,13 @@ import 'package:neurino/neurino.dart';
 main() {
   // model graph
   var k = new Constant(1, id: "k");
-  var x1 = new Input(id: "x");
+  var x1 = new ModelInput(id: "x");
   var w1 = new Variable();
   var b1 = new Variable();
 
   var mul1 = new Mul(x1, w1);
   var yPredicted1 = new Add(mul1, b1);
-  var yReal1 = new Input();
+  var yReal1 = new ModelInput();
   var loss1 = new Loss1(yPredicted1, yReal1);
 
   var initVariables = new Batch([
