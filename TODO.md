@@ -1,6 +1,9 @@
 # TODO list
 
-- Calcolo del gradiente con backprop
++ Calcolo del gradiente con backprop
+- Rivedere nomi: checkParentDependency, checkInternalDependency, checkCompositeDependency
+- Rivedere i nomi: propagateLocalGradients, propagateTargetGradients, evaluateLocalGradients, evaluateTargetGradients
+- Metodo evaluateTargetGradients automatico
 - Aggiornamento delle variabili con gradiente calcolato dalla backprop
 
 - relazione tra nodi (che tipi di relazione esistono? pensa anche al variableupdate...)

@@ -54,6 +54,16 @@ class VariableImpl extends BaseNodeImpl implements Variable {
     throw new StateError("Variable $this not initialized");
   }
 
+  bool get isGradientEvaluated => state.isTargetGradientEvaluated;
+
+  get gradientEvaluation {
+    if (!isGradientEvaluated) {
+      throw new StateError("Variable gradient $this not evaluated");
+    }
+
+    return state.targetGradient;
+  }
+
   @override
   void evaluateLocalGradients() {
     // qui mi fermo

@@ -23,8 +23,7 @@ void main() {
           y = new Negate(add, id: "y");
         });
 
-      var session = new Session(model);
-      session.asDefault(() {
+      new Session(model).asDefault((session) {
         session.run(new AllVariablesInitialize());
 
         session.run(new GradientsEvaluate(y), inputs: {x: 1});
@@ -46,8 +45,7 @@ void main() {
           f = new Mul(q, z, id: "f");
         });
 
-      var session = new Session(model);
-      session.asDefault(() {
+      new Session(model).asDefault((session) {
         session.run(new GradientsEvaluate(f), inputs: {x: -2, y: 5, z: -4});
       });
     });
@@ -77,8 +75,7 @@ void main() {
           inv = new Div(1, inc, id: "inv");
         });
 
-      var session = new Session(model);
-      session.asDefault(() {
+      new Session(model).asDefault((session) {
         session.run(new GradientsEvaluate(inv),
             inputs: {w0: 2, x0: -1, w1: -3, x1: -2, w2: -3});
 
@@ -116,8 +113,7 @@ void main() {
           inv = new Div(1, composite, id: "inv");
         });
 
-      var session = new Session(model);
-      session.asDefault(() {
+      new Session(model).asDefault((session) {
         session.run(new GradientsEvaluate(inv),
             inputs: {w0: 2, x0: -1, w1: -3, x1: -2, w2: -3});
 

@@ -12,8 +12,7 @@ void main() {
 
       expect(k.evaluation, 1);
 
-      var session = new Session();
-      session.asDefault(() {
+      new Session().asDefault((session) {
         expect(k.evaluation, 1);
 
         expect(session.run(k), 1);
@@ -26,8 +25,7 @@ void main() {
       expect(x.isEvaluated, false);
       expect(() => x.evaluation, throwsStateError);
 
-      var session = new Session();
-      session.asDefault(() {
+      new Session().asDefault((session) {
         expect(x.isEvaluated, false);
         expect(() => x.evaluation, throwsStateError);
 
@@ -51,8 +49,7 @@ void main() {
       expect(initX.isEvaluated, false);
       expect(() => initX.evaluation, throwsStateError);
 
-      var session = new Session();
-      session.asDefault(() {
+      new Session().asDefault((session) {
         expect(x.isEvaluated, false);
         expect(() => x.evaluation, throwsStateError);
         expect(initX.isEvaluated, false);
@@ -88,8 +85,7 @@ void main() {
     test('4', () {
       var y = new Add(5, new Constant(4));
 
-      var session = new Session();
-      session.asDefault(() {
+      new Session().asDefault((session) {
         expect(session.run(y), 9);
         expect(y.evaluation, 9);
       });
@@ -111,8 +107,7 @@ void main() {
           y = new Negate(add, id: "y");
         });
 
-      var session = new Session(model);
-      session.asDefault(() {
+      new Session(model).asDefault((session) {
         session.run(new AllVariablesInitialize());
 
         expect(session.run(y, inputs: {x: 5}), -7);
@@ -136,8 +131,7 @@ void main() {
           y = new Negate(composite, id: "y");
         });
 
-      var session = new Session(model);
-      session.asDefault(() {
+      new Session(model).asDefault((session) {
         session.run(new AllVariablesInitialize());
 
         expect(session.run(y, inputs: {x: 5}), -7);
@@ -163,8 +157,7 @@ void main() {
           y = new Negate(composite, id: "y");
         });
 
-      var session = new Session(model);
-      session.asDefault(() {
+      new Session(model).asDefault((session) {
         expect(session.run(new AllVariablesInitialize()), true);
         expect(session.run(y, inputs: {x: 5}), -7);
         expect(y.evaluation, -7);
@@ -177,8 +170,7 @@ void main() {
           var x = new ModelInput();
           var y = new Memory(x, new Constant(0));
 
-          var session = new Session();
-          session.asDefault(() {
+          new Session().asDefault((session) {
             expect(session.run(y, inputs: {x: 1}), 0);
             expect(session.run(y, inputs: {x: 2}), 1);
             expect(session.run(y, inputs: {x: 3}), 2);

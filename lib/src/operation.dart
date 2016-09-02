@@ -46,7 +46,12 @@ abstract class Max implements Node {
       new MaxImpl(input1, input2, id: id);
 }
 
+abstract class Loss2 implements Node {
+  factory Loss2(input1, input2, {String id}) =>
+      new Loss2Impl(input1, input2, id: id);
+}
+
 abstract class GradientsEvaluate implements Node {
-  factory GradientsEvaluate(target, {String id}) =>
-      new GradientsEvaluateImpl(target, id: id);
+  factory GradientsEvaluate(target, {num learningRate: 1, String id}) =>
+      new GradientsEvaluateImpl(target, learningRate: learningRate, id: id);
 }

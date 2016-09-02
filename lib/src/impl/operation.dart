@@ -6,6 +6,8 @@ import "dart:math";
 import "../operation.dart";
 
 import "node.dart";
+import "container.dart";
+import "variable.dart";
 import "session.dart";
 
 class BatchImpl extends BaseNodeImpl implements Batch {
@@ -282,13 +284,46 @@ class MaxImpl extends BaseNodeImpl implements Max {
   }
 }
 
+class Loss2Impl extends BaseNodeImpl implements Loss2 {
+  static const String _type = "loss2";
+
+  final BaseNodeImpl _input1;
+  final BaseNodeImpl _input2;
+
+  Loss2Impl(input1, input2, {String id})
+      : this._input1 = toNode(input1),
+        this._input2 = toNode(input2),
+        super(id, _type) {
+    checkInternalDependency(_input1);
+    checkInternalDependency(_input2);
+  }
+
+  @override
+  calculateEvaluation() => pow(_input1.evaluate() - _input2.evaluate(), 2) / 2;
+
+  @override
+  void evaluateLocalGradients() {
+    _input1.propagateLocalGradients(_input1.evaluation - _input2.evaluation);
+    _input2.propagateLocalGradients(_input2.evaluation - _input1.evaluation);
+  }
+
+  @override
+  void evaluateTargetGradients(gradient) {
+    _input1.propagateTargetGradients(gradient);
+    _input2.propagateTargetGradients(gradient);
+  }
+}
+
 class GradientsEvaluateImpl extends BaseNodeImpl implements GradientsEvaluate {
   static const String _type = "gradients";
 
   final BaseNodeImpl _target;
 
-  GradientsEvaluateImpl(target, {String id})
+  final num _learningRate;
+
+  GradientsEvaluateImpl(target, {num learningRate, String id})
       : this._target = toNode(target),
+        this._learningRate = learningRate,
         super(id, _type) {
     checkInternalDependency(_target);
   }
@@ -300,6 +335,13 @@ class GradientsEvaluateImpl extends BaseNodeImpl implements GradientsEvaluate {
     _target.propagateLocalGradients();
 
     _target.propagateTargetGradients();
+
+    defaultContainer.allVariables.forEach((VariableImpl variable) {
+      // print("Gradient: $variable = ${variable.gradientEvaluation}");
+
+      variable.updateEvaluation(
+          variable.evaluation - _learningRate * variable.gradientEvaluation);
+    });
 
     return true;
   }

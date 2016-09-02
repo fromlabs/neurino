@@ -9,7 +9,7 @@ import "impl/session.dart";
 abstract class Session {
   factory Session([Model model]) => new SessionImpl(model);
 
-  void asDefault(void scopedRunnable());
+  void asDefault(void scopedRunnable(Session session));
 
   run(Node target, {Map<ModelInput, dynamic> inputs: const {}});
 }

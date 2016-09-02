@@ -21,13 +21,15 @@ class SessionImpl implements Session {
 
   SessionImpl([ModelImpl model]) : this._model = model ?? defaultModel;
 
-  void asDefault(void scopedRunnable()) {
+  void asDefault(void scopedRunnable(Session session)) {
     if (defaultContainer != _model) {
       _model.asDefault(() {
-        runZoned(scopedRunnable, zoneValues: {_defaultSessionKey: this});
+        runZoned(() => scopedRunnable(this),
+            zoneValues: {_defaultSessionKey: this});
       });
     } else {
-      runZoned(scopedRunnable, zoneValues: {_defaultSessionKey: this});
+      runZoned(() => scopedRunnable(this),
+          zoneValues: {_defaultSessionKey: this});
     }
   }
 
