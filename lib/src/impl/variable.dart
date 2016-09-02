@@ -53,6 +53,16 @@ class VariableImpl extends BaseNodeImpl implements Variable {
   calculateEvaluation() {
     throw new StateError("Variable $this not initialized");
   }
+
+  @override
+  void evaluateLocalGradients() {
+    // qui mi fermo
+  }
+
+  @override
+  void evaluateTargetGradients(gradient) {
+    // qui mi fermo
+  }
 }
 
 class VariableUpdateImpl extends BaseNodeImpl implements VariableUpdate {
@@ -75,10 +85,21 @@ class VariableUpdateImpl extends BaseNodeImpl implements VariableUpdate {
 
     return true;
   }
+
+  @override
+  void evaluateLocalGradients() {
+    // qui mi fermo
+  }
+
+  @override
+  void evaluateTargetGradients(gradient) {
+    // TODO to implement
+    throw new UnimplementedError("TO IMPLEMENT");
+  }
 }
 
 class AllVariableInitializeImpl extends BaseNodeImpl
-    implements AllVariableInitialize {
+    implements AllVariablesInitialize {
   static const String _type = "all_variable_initialize";
 
   AllVariableInitializeImpl({String id}) : super(id, _type);
@@ -90,5 +111,17 @@ class AllVariableInitializeImpl extends BaseNodeImpl
     });
 
     return true;
+  }
+
+  @override
+  void evaluateLocalGradients() {
+    // TODO to implement
+    throw new UnimplementedError("TO IMPLEMENT");
+  }
+
+  @override
+  void evaluateTargetGradients(gradient) {
+    // TODO to implement
+    throw new UnimplementedError("TO IMPLEMENT");
   }
 }

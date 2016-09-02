@@ -18,7 +18,7 @@ abstract class VariableUpdate implements Node {
       new VariableUpdateImpl(variable, toNode(value), id: id);
 }
 
-abstract class AllVariableInitialize implements Node {
-  factory AllVariableInitialize({String id}) =>
+abstract class AllVariablesInitialize implements Node {
+  factory AllVariablesInitialize({String id}) =>
       new AllVariableInitializeImpl(id: id);
 }

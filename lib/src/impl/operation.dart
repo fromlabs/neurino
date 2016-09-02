@@ -20,6 +20,18 @@ class BatchImpl extends BaseNodeImpl implements Batch {
   @override
   calculateEvaluation() =>
       _inputs.map((input) => input.evaluate()).toList(growable: false);
+
+  @override
+  void evaluateLocalGradients() {
+    // TODO to implement
+    throw new UnimplementedError("TO IMPLEMENT");
+  }
+
+  @override
+  void evaluateTargetGradients(gradient) {
+    // TODO to implement
+    throw new UnimplementedError("TO IMPLEMENT");
+  }
 }
 
 class MemoryImpl extends BaseNodeImpl implements Memory {
@@ -48,10 +60,24 @@ class MemoryImpl extends BaseNodeImpl implements Memory {
   @override
   calculateEvaluation() {
     try {
-      return state.contains(_MEMORY_KEY) ? state[_MEMORY_KEY] : _initial.evaluate();
+      return state.contains(_MEMORY_KEY)
+          ? state[_MEMORY_KEY]
+          : _initial.evaluate();
     } finally {
       state[_MEMORY_KEY] = _input.evaluate();
     }
+  }
+
+  @override
+  void evaluateLocalGradients() {
+    // TODO to implement
+    throw new UnimplementedError("TO IMPLEMENT");
+  }
+
+  @override
+  void evaluateTargetGradients(gradient) {
+    // TODO to implement
+    throw new UnimplementedError("TO IMPLEMENT");
   }
 }
 
@@ -71,6 +97,18 @@ class AddImpl extends BaseNodeImpl implements Add {
 
   @override
   calculateEvaluation() => _input1.evaluate() + _input2.evaluate();
+
+  @override
+  void evaluateLocalGradients() {
+    _input1.propagateLocalGradients(1);
+    _input2.propagateLocalGradients(1);
+  }
+
+  @override
+  void evaluateTargetGradients(gradient) {
+    _input1.propagateTargetGradients(gradient);
+    _input2.propagateTargetGradients(gradient);
+  }
 }
 
 class MulImpl extends BaseNodeImpl implements Mul {
@@ -89,6 +127,49 @@ class MulImpl extends BaseNodeImpl implements Mul {
 
   @override
   calculateEvaluation() => _input1.evaluate() * _input2.evaluate();
+
+  @override
+  void evaluateLocalGradients() {
+    _input1.propagateLocalGradients(_input2.evaluation);
+    _input2.propagateLocalGradients(_input1.evaluation);
+  }
+
+  @override
+  void evaluateTargetGradients(gradient) {
+    _input1.propagateTargetGradients(gradient);
+    _input2.propagateTargetGradients(gradient);
+  }
+}
+
+class DivImpl extends BaseNodeImpl implements Div {
+  static const String _type = "div";
+
+  final BaseNodeImpl _input1;
+  final BaseNodeImpl _input2;
+
+  DivImpl(input1, input2, {String id})
+      : this._input1 = toNode(input1),
+        this._input2 = toNode(input2),
+        super(id, _type) {
+    checkInternalDependency(_input1);
+    checkInternalDependency(_input2);
+  }
+
+  @override
+  calculateEvaluation() => _input1.evaluate() / _input2.evaluate();
+
+  @override
+  void evaluateLocalGradients() {
+    _input1.propagateLocalGradients(1 / _input2.evaluation);
+    _input2.propagateLocalGradients(
+        -(_input1.evaluation / pow(_input2.evaluation, 2)));
+  }
+
+  @override
+  void evaluateTargetGradients(gradient) {
+    _input1.propagateTargetGradients(gradient);
+    _input2.propagateTargetGradients(gradient);
+  }
 }
 
 class NegateImpl extends BaseNodeImpl implements Negate {
@@ -104,6 +185,41 @@ class NegateImpl extends BaseNodeImpl implements Negate {
 
   @override
   calculateEvaluation() => -_input.evaluate();
+
+  @override
+  void evaluateLocalGradients() {
+    _input.propagateLocalGradients(-1);
+  }
+
+  @override
+  void evaluateTargetGradients(gradient) {
+    _input.propagateTargetGradients(state.targetGradient);
+  }
+}
+
+class ExpImpl extends BaseNodeImpl implements Exp {
+  static const String _type = "exp";
+
+  final BaseNodeImpl _input;
+
+  ExpImpl(input, {String id})
+      : this._input = toNode(input),
+        super(id, _type) {
+    checkInternalDependency(_input);
+  }
+
+  @override
+  calculateEvaluation() => exp(_input.evaluate());
+
+  @override
+  void evaluateLocalGradients() {
+    _input.propagateLocalGradients(exp(_input.evaluate()));
+  }
+
+  @override
+  void evaluateTargetGradients(gradient) {
+    _input.propagateTargetGradients(state.targetGradient);
+  }
 }
 
 class AbsImpl extends BaseNodeImpl implements Abs {
@@ -121,6 +237,18 @@ class AbsImpl extends BaseNodeImpl implements Abs {
   calculateEvaluation() {
     num value = _input.evaluate();
     return value.abs();
+  }
+
+  @override
+  void evaluateLocalGradients() {
+    // TODO to implement
+    throw new UnimplementedError("TO IMPLEMENT");
+  }
+
+  @override
+  void evaluateTargetGradients(gradient) {
+    // TODO to implement
+    throw new UnimplementedError("TO IMPLEMENT");
   }
 }
 
@@ -140,64 +268,51 @@ class MaxImpl extends BaseNodeImpl implements Max {
 
   @override
   calculateEvaluation() => max(_input1.evaluate(), _input2.evaluate());
-}
 
-class GreaterEqualImpl extends BaseNodeImpl implements GreaterEqual {
-  static const String _type = "greater_equal";
-
-  final BaseNodeImpl _input1;
-  final BaseNodeImpl _input2;
-
-  GreaterEqualImpl(input1, input2, {String id})
-      : this._input1 = toNode(input1),
-        this._input2 = toNode(input2),
-        super(id, _type) {
-    checkInternalDependency(_input1);
-    checkInternalDependency(_input2);
+  @override
+  void evaluateLocalGradients() {
+    // TODO to implement
+    throw new UnimplementedError("TO IMPLEMENT");
   }
 
   @override
-  calculateEvaluation() => _input1.evaluate() >= _input2.evaluate();
+  void evaluateTargetGradients(gradient) {
+    // TODO to implement
+    throw new UnimplementedError("TO IMPLEMENT");
+  }
 }
 
-class NotImpl extends BaseNodeImpl implements Not {
-  static const String _type = "not";
+class GradientsEvaluateImpl extends BaseNodeImpl implements GradientsEvaluate {
+  static const String _type = "gradients";
 
-  final BaseNodeImpl _input;
+  final BaseNodeImpl _target;
 
-  NotImpl(input, {String id})
-      : this._input = toNode(input),
+  GradientsEvaluateImpl(target, {String id})
+      : this._target = toNode(target),
         super(id, _type) {
-    checkInternalDependency(_input);
+    checkInternalDependency(_target);
   }
 
   @override
   calculateEvaluation() {
-    bool value = _input.evaluate();
-    return !value;
-  }
-}
+    _target.evaluate();
 
-class IfImpl extends BaseNodeImpl implements If {
-  static const String _type = "if";
+    _target.propagateLocalGradients();
 
-  final BaseNodeImpl _ifInput;
-  final BaseNodeImpl _thenInput;
-  final BaseNodeImpl _elseInput;
+    _target.propagateTargetGradients();
 
-  IfImpl(ifInput, thenInput, elseInput, {String id})
-      : this._ifInput = toNode(ifInput),
-        this._thenInput = toNode(thenInput),
-        this._elseInput = toNode(elseInput),
-        super(id, _type) {
-    checkInternalDependency(_ifInput);
-    checkInternalDependency(_thenInput);
-    checkInternalDependency(_elseInput);
+    return true;
   }
 
   @override
-  calculateEvaluation() {
-    bool value = _ifInput.evaluate();
-    return value ? _thenInput.evaluate() : _elseInput.evaluate();
+  void evaluateLocalGradients() {
+    // TODO to implement
+    throw new UnimplementedError("TO IMPLEMENT");
+  }
+
+  @override
+  void evaluateTargetGradients(gradient) {
+    // TODO to implement
+    throw new UnimplementedError("TO IMPLEMENT");
   }
 }

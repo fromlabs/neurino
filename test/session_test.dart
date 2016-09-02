@@ -1,8 +1,6 @@
 // Copyright (c) 2016, Roberto Tassi. All rights reserved. Use of this source code
 // is governed by a BSD-style license that can be found in the LICENSE file.
 
-import "dart:async";
-
 import 'package:test/test.dart';
 
 import "package:neurino/neurino.dart";
@@ -46,7 +44,7 @@ void main() {
     test('3', () {
       var x = new Variable(() => 4);
 
-      var initX = new AllVariableInitialize();
+      var initX = new AllVariablesInitialize();
 
       expect(x.isEvaluated, false);
       expect(() => x.evaluation, throwsStateError);
@@ -115,7 +113,7 @@ void main() {
 
       var session = new Session(model);
       session.asDefault(() {
-        session.run(new AllVariableInitialize());
+        session.run(new AllVariablesInitialize());
 
         expect(session.run(y, inputs: {x: 5}), -7);
         expect(y.evaluation, -7);
@@ -140,7 +138,7 @@ void main() {
 
       var session = new Session(model);
       session.asDefault(() {
-        session.run(new AllVariableInitialize());
+        session.run(new AllVariablesInitialize());
 
         expect(session.run(y, inputs: {x: 5}), -7);
         expect(y.evaluation, -7);
@@ -149,8 +147,6 @@ void main() {
 
     test('7', () {
       var x;
-      var w;
-      var b;
       var y;
 
       var model = new Model()
@@ -169,7 +165,7 @@ void main() {
 
       var session = new Session(model);
       session.asDefault(() {
-        expect(session.run(new AllVariableInitialize()), true);
+        expect(session.run(new AllVariablesInitialize()), true);
         expect(session.run(y, inputs: {x: 5}), -7);
         expect(y.evaluation, -7);
       });

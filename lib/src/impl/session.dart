@@ -82,6 +82,10 @@ class ModelState {
 class NodeState {
   static const String _EVALUATION_KEY = "_EVALUATION";
 
+  static const String _LOCAL_GRADIENT_KEY = "_LOCAL_GRADIENT";
+
+  static const String _TARGET_GRADIENT_KEY = "_TARGET_GRADIENT";
+
   final Map<dynamic, dynamic> _values = {};
 
   bool get isEvaluated => contains(_EVALUATION_KEY);
@@ -90,6 +94,22 @@ class NodeState {
 
   void set evaluation(value) {
     this[_EVALUATION_KEY] = value;
+  }
+
+  bool get isLocalGradientEvaluated => contains(_LOCAL_GRADIENT_KEY);
+
+  get localGradient => this[_LOCAL_GRADIENT_KEY];
+
+  void set localGradient(value) {
+    this[_LOCAL_GRADIENT_KEY] = value;
+  }
+
+  bool get isTargetGradientEvaluated => contains(_TARGET_GRADIENT_KEY);
+
+  get targetGradient => this[_TARGET_GRADIENT_KEY];
+
+  void set targetGradient(value) {
+    this[_TARGET_GRADIENT_KEY] = value;
   }
 
   bool contains(key) => _values.containsKey(key);

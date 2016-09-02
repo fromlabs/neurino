@@ -1,8 +1,6 @@
 // Copyright (c) 2016, Roberto Tassi. All rights reserved. Use of this source code
 // is governed by a BSD-style license that can be found in the LICENSE file.
 
-import "dart:async";
-
 import 'package:test/test.dart';
 
 import "package:neurino/neurino.dart";
@@ -10,94 +8,6 @@ import "package:neurino/neurino.dart";
 void main() {
   group('Model Tests', () {
     test('1', () {
-      var k = new Constant(1);
-
-      expect(k.evaluation, 1);
-
-      var session = new Session();
-      session.asDefault(() {
-        expect(k.evaluation, 1);
-
-        expect(session.run(k), 1);
-      });
-    });
-
-    test('2', () {
-      var x = new ModelInput();
-
-      expect(x.isEvaluated, false);
-      expect(() => x.evaluation, throwsStateError);
-
-      var session = new Session();
-      session.asDefault(() {
-        expect(x.isEvaluated, false);
-        expect(() => x.evaluation, throwsStateError);
-
-        expect(() => session.run(x), throwsStateError);
-
-        expect(session.run(x, inputs: {x: 2}), 2);
-        expect(x.evaluation, 2);
-
-        expect(session.run(x, inputs: {x: 3}), 3);
-        expect(x.evaluation, 3);
-      });
-    });
-
-    test('3', () {
-      var x = new Variable(() => 4);
-
-      var initX = new AllVariableInitialize();
-
-      expect(x.isEvaluated, false);
-      expect(() => x.evaluation, throwsStateError);
-      expect(initX.isEvaluated, false);
-      expect(() => initX.evaluation, throwsStateError);
-
-      var session = new Session();
-      session.asDefault(() {
-        expect(x.isEvaluated, false);
-        expect(() => x.evaluation, throwsStateError);
-        expect(initX.isEvaluated, false);
-        expect(() => initX.evaluation, throwsStateError);
-
-        expect(() => session.run(x), throwsStateError);
-
-        expect(session.run(initX), true);
-
-        expect(x.isEvaluated, true);
-        expect(initX.isEvaluated, true);
-
-        expect(x.evaluation, 4);
-
-        expect(session.run(x), 4);
-
-        expect(session.run(initX), true);
-
-        expect(session.run(new Batch([initX])), [true]);
-        expect(session.run(new Batch([new VariableUpdate(x, 5)])), [true]);
-
-        expect(session.run(x), 5);
-
-        expect(
-            () => session.run(new Batch(
-                [new VariableUpdate(x, 6), new VariableUpdate(x, 7)])),
-            throwsStateError);
-
-        expect(session.run(x), 5);
-      });
-    });
-
-    test('4', () {
-      var y = new Add(5, new Constant(4));
-
-      var session = new Session();
-      session.asDefault(() {
-        expect(session.run(y), 9);
-        expect(y.evaluation, 9);
-      });
-    });
-
-    test('5', () {
       var x;
       var w;
       var b;
@@ -105,9 +15,9 @@ void main() {
 
       var model = new Model()
         ..asDefault(() {
-          x = new ModelInput();
-          w = new Variable(() => 1);
-          b = new Variable(() => 2);
+          x = new ModelInput(id: "x");
+          w = new Variable(() => 1, id: "w");
+          b = new Variable(() => 2, id: "b");
           var mul = new Mul(w, x, id: "mul");
           var add = new Add(mul, b, id: "add");
           y = new Negate(add, id: "y");
@@ -115,63 +25,103 @@ void main() {
 
       var session = new Session(model);
       session.asDefault(() {
-        session.run(new AllVariableInitialize());
+        session.run(new AllVariablesInitialize());
 
-        expect(session.run(y, inputs: {x: 5}), -7);
-        expect(y.evaluation, -7);
+        session.run(new GradientsEvaluate(y), inputs: {x: 1});
       });
     });
 
-    test('6', () {
+    test('2', () {
       var x;
-      var w;
-      var b;
       var y;
+      var z;
+      var f;
 
       var model = new Model()
         ..asDefault(() {
-          x = new ModelInput();
-          w = new Variable(() => 1);
-          b = new Variable(() => 2);
-          var composite = new Composite({"x": x, "w": w, "b": b},
-              (inputs) => new Add(new Mul(inputs[w], inputs[x]), inputs[b]));
-          y = new Negate(composite, id: "y");
+          x = new ModelInput(id: "x");
+          y = new ModelInput(id: "y");
+          z = new ModelInput(id: "z");
+          var q = new Add(x, y, id: "q");
+          f = new Mul(q, z, id: "f");
         });
 
       var session = new Session(model);
       session.asDefault(() {
-        session.run(new AllVariableInitialize());
-
-        expect(session.run(y, inputs: {x: 5}), -7);
-        expect(y.evaluation, -7);
+        session.run(new GradientsEvaluate(f), inputs: {x: -2, y: 5, z: -4});
       });
     });
 
-    test('7', () {
-      var x;
-      var w;
-      var b;
-      var y;
+    test('3', () {
+      var w0;
+      var x0;
+      var w1;
+      var x1;
+      var w2;
+      var inv;
 
       var model = new Model()
         ..asDefault(() {
-          x = new ModelInput();
-          var composite = new Composite({"x": x}, (parentInputs) {
-            var w = new Variable(() => 1);
-            var b = new Variable(() => 2);
-
-            expect(() => new Negate(x), throwsArgumentError);
-
-            return new Add(new Mul(w, parentInputs[x]), b);
-          });
-          y = new Negate(composite, id: "y");
+          w0 = new ModelInput(id: "w0");
+          x0 = new ModelInput(id: "x0");
+          w1 = new ModelInput(id: "w1");
+          x1 = new ModelInput(id: "x1");
+          w2 = new ModelInput(id: "w2");
+          var mul0 = new Mul(w0, x0, id: "mul0");
+          var mul1 = new Mul(w1, x1, id: "mul1");
+          var add0 = new Add(mul0, mul1, id: "add0");
+          var add1 = new Add(add0, w2, id: "add1");
+          var neg = new Negate(add1, id: "neg");
+          var exp = new Exp(neg, id: "exp");
+          var inc = new Add(exp, 1, id: "inc");
+          inv = new Div(1, inc, id: "inv");
         });
 
       var session = new Session(model);
       session.asDefault(() {
-        expect(session.run(new AllVariableInitialize()), true);
-        expect(session.run(y, inputs: {x: 5}), -7);
-        expect(y.evaluation, -7);
+        session.run(new GradientsEvaluate(inv),
+            inputs: {w0: 2, x0: -1, w1: -3, x1: -2, w2: -3});
+
+        print(inv.evaluation);
+      });
+    });
+
+    test('4', () {
+      var w0;
+      var x0;
+      var w1;
+      var x1;
+      var w2;
+      var inv;
+
+      var model = new Model()
+        ..asDefault(() {
+          w0 = new ModelInput(id: "w0");
+          x0 = new ModelInput(id: "x0");
+          w1 = new ModelInput(id: "w1");
+          x1 = new ModelInput(id: "x1");
+          w2 = new ModelInput(id: "w2");
+
+          var composite = new Composite(
+              {"w0": w0, "x0": x0, "w1": w1, "x1": x1, "w2": w2}, (inputs) {
+            var mul0 = new Mul(inputs[w0], inputs[x0], id: "mul0");
+            var mul1 = new Mul(inputs[w1], inputs[x1], id: "mul1");
+            var add0 = new Add(mul0, mul1, id: "add0");
+            var add1 = new Add(add0, inputs[w2], id: "add1");
+            var neg = new Negate(add1, id: "neg");
+            var exp = new Exp(neg, id: "exp");
+            return new Add(exp, 1, id: "inc");
+          }, id: "composite");
+
+          inv = new Div(1, composite, id: "inv");
+        });
+
+      var session = new Session(model);
+      session.asDefault(() {
+        session.run(new GradientsEvaluate(inv),
+            inputs: {w0: 2, x0: -1, w1: -3, x1: -2, w2: -3});
+
+        print(inv.evaluation);
       });
     });
   });

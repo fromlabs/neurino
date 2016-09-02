@@ -24,8 +24,17 @@ abstract class Mul implements Node {
       new MulImpl(input1, input2, id: id);
 }
 
+abstract class Div implements Node {
+  factory Div(input1, input2, {String id}) =>
+      new DivImpl(input1, input2, id: id);
+}
+
 abstract class Negate implements Node {
   factory Negate(input, {String id}) => new NegateImpl(input, id: id);
+}
+
+abstract class Exp implements Node {
+  factory Exp(input, {String id}) => new ExpImpl(input, id: id);
 }
 
 abstract class Abs implements Node {
@@ -37,16 +46,7 @@ abstract class Max implements Node {
       new MaxImpl(input1, input2, id: id);
 }
 
-abstract class GreaterEqual implements Node {
-  factory GreaterEqual(input1, input2, {String id}) =>
-      new GreaterEqualImpl(input1, input2, id: id);
-}
-
-abstract class Not implements Node {
-  factory Not(input, {String id}) => new NotImpl(input, id: id);
-}
-
-abstract class If implements Node {
-  factory If(ifInput, thenInput, elseInput, {String id}) =>
-      new IfImpl(ifInput, thenInput, elseInput, id: id);
+abstract class GradientsEvaluate implements Node {
+  factory GradientsEvaluate(target, {String id}) =>
+      new GradientsEvaluateImpl(target, id: id);
 }

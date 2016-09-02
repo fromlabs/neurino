@@ -4,7 +4,6 @@
 import "dart:async";
 
 import "../model.dart";
-import "../node.dart";
 
 import "model.dart";
 import "node.dart";

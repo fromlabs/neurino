@@ -1,8 +1,6 @@
 // Copyright (c) 2016, Roberto Tassi. All rights reserved. Use of this source code
 // is governed by a BSD-style license that can be found in the LICENSE file.
 
-import "dart:async";
-
 import "../node.dart";
 
 import "container.dart";
@@ -38,9 +36,11 @@ abstract class BaseNodeImpl implements Node {
 
   void initializeState(NodeState newState, NodeState previousState) {}
 
-  calculateEvaluation() {
-    throw new UnsupportedError("Evaluation");
-  }
+  calculateEvaluation();
+
+  void evaluateLocalGradients();
+
+  void evaluateTargetGradients(gradient);
 
   @override
   bool get isEvaluated => state?.isEvaluated ?? false;
@@ -74,8 +74,30 @@ abstract class BaseNodeImpl implements Node {
 
   NodeState get state => defaultSession?.getNodeState(this);
 
+  void propagateLocalGradients([gradient]) {
+    if (!state.isLocalGradientEvaluated) {
+      state.localGradient = gradient ?? 1;
+
+      evaluateLocalGradients();
+    } else {
+      state.localGradient = state.localGradient + gradient;
+    }
+  }
+
+  void propagateTargetGradients([gradient]) {
+    if (!state.isLocalGradientEvaluated) {
+      throw new StateError("Local gradient not evaluated in $this");
+    }
+
+    if (!state.isTargetGradientEvaluated) {
+      state.targetGradient = state.localGradient * (gradient ?? 1);
+
+      evaluateTargetGradients(state.targetGradient);
+    }
+  }
+
   @override
-  String toString() => "\"$id\"";
+  String toString() => "${_container is BaseNodeImpl ? "$_container/" : ""}$id";
 }
 
 class ConstantImpl extends BaseNodeImpl implements Constant {
@@ -92,13 +114,23 @@ class ConstantImpl extends BaseNodeImpl implements Constant {
   get evaluation => _value;
 
   @override
+  void updateEvaluation(value) {
+    throw new UnsupportedError("Constant update");
+  }
+
+  @override
   calculateEvaluation() {
     throw new UnsupportedError("Constant calculation");
   }
 
   @override
-  void updateEvaluation(value) {
-    throw new UnsupportedError("Constant update");
+  void evaluateLocalGradients() {
+    // qui mi fermo
+  }
+
+  @override
+  void evaluateTargetGradients(gradient) {
+    // qui mi fermo
   }
 }
 
@@ -111,7 +143,7 @@ class CompositeImpl extends BaseNodeImpl
 
   final Map<BaseNodeImpl, CompositeInputImpl> _inputs = {};
 
-  BaseNodeImpl _output;
+  BaseNodeImpl _target;
 
   CompositeImpl(Map<String, BaseNodeImpl> inputs,
       BaseNodeImpl nodeFactory(Map<BaseNodeImpl, CompositeInputImpl> inputs),
@@ -120,12 +152,12 @@ class CompositeImpl extends BaseNodeImpl
         super(id, _type) {
     asDefault(() {
       var compositeInputs = _toCompositeInputs(inputs);
-      var output = nodeFactory(compositeInputs);
+      var target = nodeFactory(compositeInputs);
 
-      checkCompositeDependency(output);
+      checkCompositeDependency(target);
 
       this._inputs.addAll(compositeInputs);
-      _output = output;
+      _target = target;
     });
   }
 
@@ -143,7 +175,25 @@ class CompositeImpl extends BaseNodeImpl
   }
 
   @override
-  calculateEvaluation() => _output.evaluate();
+  calculateEvaluation() => _target.evaluate();
+
+  @override
+  void evaluateLocalGradients() {
+    _target.propagateLocalGradients();
+
+    _target.propagateTargetGradients();
+
+    _inputs.forEach((externalInput, internalInput) {
+      internalInput.propagateTargetGradientsToParent();
+    });
+  }
+
+  @override
+  void evaluateTargetGradients(gradient) {
+    _inputs.forEach((externalInput, internalInput) {
+      externalInput.propagateTargetGradients(gradient);
+    });
+  }
 }
 
 class ModelInputImpl extends BaseNodeImpl implements ModelInput {
@@ -164,6 +214,16 @@ class ModelInputImpl extends BaseNodeImpl implements ModelInput {
   calculateEvaluation() {
     throw new StateError("Model input $this not specified");
   }
+
+  @override
+  void evaluateLocalGradients() {
+    // qui mi fermo
+  }
+
+  @override
+  void evaluateTargetGradients(gradient) {
+    // qui mi fermo
+  }
 }
 
 class CompositeInputImpl extends BaseNodeImpl implements CompositeInput {
@@ -177,4 +237,20 @@ class CompositeInputImpl extends BaseNodeImpl implements CompositeInput {
 
   @override
   calculateEvaluation() => _input.evaluate();
+
+  @override
+  void evaluateLocalGradients() {
+    // qui mi fermo
+  }
+
+  @override
+  void evaluateTargetGradients(gradient) {
+    // qui mi fermo
+  }
+
+  void propagateTargetGradientsToParent() {
+    if (state.isTargetGradientEvaluated) {
+      _input.propagateLocalGradients(state.targetGradient);
+    }
+  }
 }
