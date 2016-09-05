@@ -102,8 +102,8 @@ class AddImpl extends BaseNodeImpl implements Add {
 
   @override
   void evaluateLocalGradients() {
-    _input1.propagateLocalGradients(1);
-    _input2.propagateLocalGradients(1);
+    _input1.propagateLocalGradients(1.0);
+    _input2.propagateLocalGradients(1.0);
   }
 
   @override
@@ -162,9 +162,9 @@ class DivImpl extends BaseNodeImpl implements Div {
 
   @override
   void evaluateLocalGradients() {
-    _input1.propagateLocalGradients(1 / _input2.evaluation);
+    _input1.propagateLocalGradients(1.0 / _input2.evaluation);
     _input2.propagateLocalGradients(
-        -(_input1.evaluation / pow(_input2.evaluation, 2)));
+        -(_input1.evaluation / (_input2.evaluation * _input2.evaluation)));
   }
 
   @override
@@ -190,7 +190,7 @@ class NegateImpl extends BaseNodeImpl implements Negate {
 
   @override
   void evaluateLocalGradients() {
-    _input.propagateLocalGradients(-1);
+    _input.propagateLocalGradients(-1.0);
   }
 
   @override
@@ -284,6 +284,59 @@ class MaxImpl extends BaseNodeImpl implements Max {
   }
 }
 
+class ReluImpl extends BaseNodeImpl implements Relu {
+  static const String _type = "relu";
+
+  final BaseNodeImpl _input;
+
+  ReluImpl(input, {String id})
+      : this._input = toNode(input),
+        super(id, _type) {
+    checkInternalDependency(_input);
+  }
+
+  @override
+  calculateEvaluation() => max(0.0, _input.evaluate());
+
+  @override
+  void evaluateLocalGradients() {
+    _input.propagateLocalGradients(_input.evaluation > 0.0 ? 1.0 : 0.0);
+  }
+
+  @override
+  void evaluateTargetGradients(gradient) {
+    _input.propagateTargetGradients(gradient);
+  }
+}
+
+class SigmoidImpl extends BaseNodeImpl implements Sigmoid {
+  static const String _type = "sigmoid";
+
+  final BaseNodeImpl _input;
+
+  SigmoidImpl(input, {String id})
+      : this._input = toNode(input),
+        super(id, _type) {
+    checkInternalDependency(_input);
+  }
+
+  @override
+  calculateEvaluation() => _sigmoid(_input.evaluate());
+
+  @override
+  void evaluateLocalGradients() {
+    var s = _sigmoid(_input.evaluation);
+    _input.propagateLocalGradients(s * (1.0 - s));
+  }
+
+  @override
+  void evaluateTargetGradients(gradient) {
+    _input.propagateTargetGradients(gradient);
+  }
+
+  num _sigmoid(num x) => 1.0 / (1.0 + exp(-x));
+}
+
 class Loss2Impl extends BaseNodeImpl implements Loss2 {
   static const String _type = "loss2";
 
@@ -299,7 +352,10 @@ class Loss2Impl extends BaseNodeImpl implements Loss2 {
   }
 
   @override
-  calculateEvaluation() => pow(_input1.evaluate() - _input2.evaluate(), 2) / 2;
+  calculateEvaluation() {
+    var delta = _input1.evaluate() - _input2.evaluate();
+    return delta * delta / 2.0;
+  }
 
   @override
   void evaluateLocalGradients() {
@@ -310,6 +366,38 @@ class Loss2Impl extends BaseNodeImpl implements Loss2 {
   @override
   void evaluateTargetGradients(gradient) {
     _input1.propagateTargetGradients(gradient);
+    _input2.propagateTargetGradients(gradient);
+  }
+}
+
+class BinaryCrossEntropyLossImpl extends BaseNodeImpl
+    implements BinaryCrossEntropyLoss {
+  static const String _type = "binary_cross_entropy_loss";
+
+  final BaseNodeImpl _input1;
+  final BaseNodeImpl _input2;
+
+  BinaryCrossEntropyLossImpl(input1, input2, {String id})
+      : this._input1 = toNode(input1),
+        this._input2 = toNode(input2),
+        super(id, _type) {
+    checkInternalDependency(_input1);
+    checkInternalDependency(_input2);
+  }
+
+  @override
+  calculateEvaluation() => -(_input1.evaluate() * log(_input2.evaluate()) +
+      (1.0 - _input1.evaluate()) * log(1.0 - _input2.evaluate()));
+
+  @override
+  void evaluateLocalGradients() {
+    _input2.propagateLocalGradients(
+        -((_input1.evaluation / _input2.evaluation) +
+            ((1.0 - _input1.evaluation) / (1.0 - _input2.evaluation))));
+  }
+
+  @override
+  void evaluateTargetGradients(gradient) {
     _input2.propagateTargetGradients(gradient);
   }
 }
@@ -337,8 +425,6 @@ class GradientsEvaluateImpl extends BaseNodeImpl implements GradientsEvaluate {
     _target.propagateTargetGradients();
 
     defaultContainer.allVariables.forEach((VariableImpl variable) {
-      // print("Gradient: $variable = ${variable.gradientEvaluation}");
-
       variable.updateEvaluation(
           variable.evaluation - _learningRate * variable.gradientEvaluation);
     });

@@ -46,9 +46,22 @@ abstract class Max implements Node {
       new MaxImpl(input1, input2, id: id);
 }
 
+abstract class Relu implements Node {
+  factory Relu(input, {String id}) => new ReluImpl(input, id: id);
+}
+
+abstract class Sigmoid implements Node {
+  factory Sigmoid(input, {String id}) => new SigmoidImpl(input, id: id);
+}
+
 abstract class Loss2 implements Node {
   factory Loss2(input1, input2, {String id}) =>
       new Loss2Impl(input1, input2, id: id);
+}
+
+abstract class BinaryCrossEntropyLoss implements Node {
+  factory BinaryCrossEntropyLoss(input1, input2, {String id}) =>
+      new BinaryCrossEntropyLossImpl(input1, input2, id: id);
 }
 
 abstract class GradientsEvaluate implements Node {
