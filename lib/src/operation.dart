@@ -16,17 +16,25 @@ abstract class Memory implements Node {
 
 abstract class Add implements Node {
   factory Add(input1, input2, {String id}) =>
-      new AddImpl(input1, input2, id: id);
+      new AddImpl([input1, input2], id: id);
+
+  factory Add.list(List inputs, {String id}) => new AddImpl(inputs, id: id);
 }
 
 abstract class Mul implements Node {
   factory Mul(input1, input2, {String id}) =>
-      new MulImpl(input1, input2, id: id);
+      new MulImpl([input1, input2], id: id);
+
+  factory Mul.list(List inputs, {String id}) => new MulImpl(inputs, id: id);
 }
 
 abstract class Div implements Node {
   factory Div(input1, input2, {String id}) =>
       new DivImpl(input1, input2, id: id);
+}
+
+abstract class Inv implements Node {
+  factory Inv(input, {String id}) => new InvImpl(input, id: id);
 }
 
 abstract class Negate implements Node {

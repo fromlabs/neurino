@@ -86,60 +86,53 @@ class MemoryImpl extends BaseNodeImpl implements Memory {
 class AddImpl extends BaseNodeImpl implements Add {
   static const String _type = "add";
 
-  final BaseNodeImpl _input1;
-  final BaseNodeImpl _input2;
+  final List<BaseNodeImpl> _inputs;
 
-  AddImpl(input1, input2, {String id})
-      : this._input1 = toNode(input1),
-        this._input2 = toNode(input2),
+  AddImpl(List inputs, {String id})
+      : this._inputs = toNodes(inputs),
         super(id, _type) {
-    checkInternalDependency(_input1);
-    checkInternalDependency(_input2);
+    _inputs.forEach((input) => checkInternalDependency(input));
   }
 
   @override
-  calculateEvaluation() => _input1.evaluate() + _input2.evaluate();
+  calculateEvaluation() =>
+      _inputs.fold(0, (prev, element) => prev + element.evaluate());
 
   @override
   void evaluateLocalGradients() {
-    _input1.propagateLocalGradients(1.0);
-    _input2.propagateLocalGradients(1.0);
+    _inputs.forEach((input) => input.propagateLocalGradients(1.0));
   }
 
   @override
   void evaluateTargetGradients(gradient) {
-    _input1.propagateTargetGradients(gradient);
-    _input2.propagateTargetGradients(gradient);
+    _inputs.forEach((input) => input.propagateTargetGradients(gradient));
   }
 }
 
 class MulImpl extends BaseNodeImpl implements Mul {
   static const String _type = "mul";
 
-  final BaseNodeImpl _input1;
-  final BaseNodeImpl _input2;
+  final List<BaseNodeImpl> _inputs;
 
-  MulImpl(input1, input2, {String id})
-      : this._input1 = toNode(input1),
-        this._input2 = toNode(input2),
+  MulImpl(List inputs, {String id})
+      : this._inputs = toNodes(inputs),
         super(id, _type) {
-    checkInternalDependency(_input1);
-    checkInternalDependency(_input2);
+    _inputs.forEach((input) => checkInternalDependency(input));
   }
 
   @override
-  calculateEvaluation() => _input1.evaluate() * _input2.evaluate();
+  calculateEvaluation() =>
+      _inputs.fold(1, (prev, element) => prev * element.evaluate());
 
   @override
   void evaluateLocalGradients() {
-    _input1.propagateLocalGradients(_input2.evaluation);
-    _input2.propagateLocalGradients(_input1.evaluation);
+    _inputs.forEach((input) =>
+        input.propagateLocalGradients(evaluation / input.evaluation));
   }
 
   @override
   void evaluateTargetGradients(gradient) {
-    _input1.propagateTargetGradients(gradient);
-    _input2.propagateTargetGradients(gradient);
+    _inputs.forEach((input) => input.propagateTargetGradients(gradient));
   }
 }
 
@@ -171,6 +164,32 @@ class DivImpl extends BaseNodeImpl implements Div {
   void evaluateTargetGradients(gradient) {
     _input1.propagateTargetGradients(gradient);
     _input2.propagateTargetGradients(gradient);
+  }
+}
+
+class InvImpl extends BaseNodeImpl implements Inv {
+  static const String _type = "inv";
+
+  final BaseNodeImpl _input;
+
+  InvImpl(input, {String id})
+      : this._input = toNode(input),
+        super(id, _type) {
+    checkInternalDependency(_input);
+  }
+
+  @override
+  calculateEvaluation() => 1.0 / _input.evaluate();
+
+  @override
+  void evaluateLocalGradients() {
+    _input.propagateLocalGradients(
+        -1.0 / (_input.evaluation * _input.evaluation));
+  }
+
+  @override
+  void evaluateTargetGradients(gradient) {
+    _input.propagateTargetGradients(gradient);
   }
 }
 

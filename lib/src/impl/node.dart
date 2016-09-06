@@ -9,6 +9,10 @@ import "session.dart";
 BaseNodeImpl toNode(value) =>
     value is BaseNodeImpl ? value : new Constant(value);
 
+List<BaseNodeImpl> toNodes(List values) => values
+    .map((value) => value is BaseNodeImpl ? value : new Constant(value))
+    .toList();
+
 abstract class BaseNodeImpl implements Node {
   final String id;
 

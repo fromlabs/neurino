@@ -134,13 +134,10 @@ List<Node> buildSigmoidDenseLayer(int neuronsCount, List<Node> inputs,
 List<Node> _buildDenseLayer(int neuronsCount, List<Node> inputs, {String id}) {
   var potentials = [];
   for (var i = 0; i < neuronsCount; i++) {
-    var xwSum = new Constant(0.0);
-    for (var x in inputs) {
-      var w = new Variable(() => 0.01);
-      xwSum = new Add(new Mul(x, w), xwSum);
-    }
-    var b = new Variable(() => 0.01);
-    potentials.add(new Add(xwSum, b));
+    var adds =
+        inputs.map((x) => new Mul.list([x, new Variable(() => 0.01)])).toList();
+    adds.add(new Variable(() => 0.01));
+    potentials.add(new Add.list(adds));
   }
   return potentials;
 }

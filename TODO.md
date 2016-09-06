@@ -1,5 +1,6 @@
 # TODO list
 
++ Operazioni su una lista di input (invece di innestare delle add per esempio)
 - gestione di calcoli su liste di valori (per supportare i batch)
 - gestione delle distribuzioni di pesi
 
@@ -14,4 +15,3 @@
 
 - Matrici n-dimensionali come valori
 - Override degli operatori più comuni
-- Operazioni su una lista di input (invece di innestare delle add per esempio)
