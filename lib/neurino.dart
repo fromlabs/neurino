@@ -3,6 +3,7 @@
 
 library neurino;
 
+export 'src/quantity.dart';
 export 'src/model.dart';
 export 'src/node.dart';
 export 'src/variable.dart';
